@@ -1,0 +1,46 @@
+,0,1
+0,chimpanzee,jelly fish
+1,chimpanzee,virus
+2,chimpanzee,robot
+3,chimpanzee,artificial intelligence
+4,chimpanzee,human
+5,chimpanzee,god
+6,chimpanzee,rock
+7,chimpanzee,autonomous car
+8,chimpanzee,computer
+9,jelly fish,virus
+10,jelly fish,robot
+11,jelly fish,artificial intelligence
+12,jelly fish,human
+13,jelly fish,god
+14,jelly fish,rock
+15,jelly fish,autonomous car
+16,jelly fish,computer
+17,virus,robot
+18,virus,artificial intelligence
+19,virus,human
+20,virus,god
+21,virus,rock
+22,virus,autonomous car
+23,virus,computer
+24,robot,artificial intelligence
+25,robot,human
+26,robot,god
+27,robot,rock
+28,robot,autonomous car
+29,robot,computer
+30,artificial intelligence,human
+31,artificial intelligence,god
+32,artificial intelligence,rock
+33,artificial intelligence,autonomous car
+34,artificial intelligence,computer
+35,human,god
+36,human,rock
+37,human,autonomous car
+38,human,computer
+39,god,rock
+40,god,autonomous car
+41,god,computer
+42,rock,autonomous car
+43,rock,computer
+44,autonomous car,computer
