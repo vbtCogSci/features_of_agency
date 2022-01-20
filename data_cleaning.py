@@ -5,8 +5,8 @@ task_raw = pd.read_csv('.\\data\\raw\\data_exp_70408-v19_task_190122.csv')
 demos_raw = pd.read_csv('.\\data\\raw\\data_exp_70408-v19_demo_190122.csv')
 
 # PRIVACY: set TRUE if exporting on github (hides prolific id), else FALSE for checks
-private = False
-if private == True:
+private = True
+if private:
     part_id_key = 'Participant Private ID'
     destination_folder = 'datasets'
 else:
@@ -46,7 +46,9 @@ for ids in part_ids_demo:
 
     df_demos = df_demos.append(demos_T)
 
-
+# If private only remove education, revenues and politics
+if private:
+    df_demos.drop(['academic', 'academic-quantised', 'revenue', 'revenue-quantised', 'politics'], axis=1, inplace=True)
 
 #### TASK LOGIC
 # Collect participant ID
