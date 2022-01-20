@@ -4,7 +4,14 @@ import numpy as np
 task_raw = pd.read_csv('.\\data\\raw\\data_exp_70408-v19_task_190122.csv')
 demos_raw = pd.read_csv('.\\data\\raw\\data_exp_70408-v19_demo_190122.csv')
 
-part_id_key = 'Participant Public ID'
+# PRIVACY: set TRUE if exporting on github (hides prolific id), else FALSE for checks
+private = False
+if private == True:
+    part_id_key = 'Participant Private ID'
+    destination_folder = 'datasets'
+else:
+    part_id_key = 'Participant Public ID'
+    destination_folder = 'datasets_prolific_id'
 
 #### DEMOGRAPHICS LOGIC
 demos_columns = ['Sex', 'Sex-quantised', 'Sex-text', 'age', 'academic', 'academic-quantised', 'revenue', 'revenue-quantised', 'politics', 'religiosity']
@@ -258,20 +265,19 @@ df_sense = pd.DataFrame(index=pairwise_binaries.index, columns=pairwise_binaries
 final_aggregate = pd.DataFrame(index=pairwise_scores.index, columns=df_aggregate.columns, data=aggregate_matrix.mean(axis=0))#.sort_values('mean_score', ascending=False)
 
 # Save files
-df_checks.to_excel('.\\data\\datasets_excel\\sanity_checks.xlsx')
-df_demos.to_excel('.\\data\\datasets_excel\\demographics.xlsx')
-df_score.to_excel('.\\data\\datasets_excel\\scores.xlsx')
-df_win.to_excel('.\\data\\datasets_excel\\probability_win.xlsx')
-df_sense.to_excel('.\\data\\datasets_excel\\sense.xlsx')
-final_aggregate.to_excel('.\\data\\datasets_excel\\summaries.xlsx')
+df_checks.to_excel('.\\data\\' + destination_folder + '\\datasets_excel\\sanity_checks.xlsx')
+df_demos.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\demographics.xlsx')
+df_score.to_excel('.\\data\\' + destination_folder + '\\datasets_excel\\scores.xlsx')
+df_win.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\probability_win.xlsx')
+df_sense.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\sense.xlsx')
+final_aggregate.to_excel('.\\data\\' + destination_folder + '\\datasets_excel\\summaries.xlsx')
 
-df_checks.to_csv('.\\data\\datasets\\sanity_checks.csv')
-df_demos.to_csv('.\\data\\datasets\\demographics.csv')
-df_score.to_csv('.\\data\\datasets\\scores.csv')
-df_win.to_csv('.\\data\\datasets\\probability_win.csv')
-df_sense.to_csv('.\\data\\datasets\\sense.csv')
-final_aggregate.to_csv('.\\data\\datasets\\summaries.csv')
-
+df_checks.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\sanity_checks.csv')
+df_demos.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\demographics.csv')
+df_score.to_csv('.\\data\\' + destination_folder + '\\datasets_csv\\scores.csv')
+df_win.to_csv('.\\data\\' + destination_folder + '\\datasets_csv\\probability_win.csv')
+df_sense.to_csv('.\\data\\' + destination_folder + '\\datasets_csv\\sense.csv')
+final_aggregate.to_csv('.\\data\\' + destination_folder + '\\datasets_csv\\summaries.csv')
 
 # PARTICIPANT-WISE DATASETS
 index_2d = pd.MultiIndex.from_product([part_ids, words], names=['part_id', 'word'])
@@ -287,19 +293,19 @@ df_sense_full = pd.DataFrame(data=sense_dataset, index=index_2d, columns=df_scor
 df_aggregate_full = pd.DataFrame(data=aggregate_dataset, index=index_2d, columns=aggregate_columns)
 
 
-df_score_full.to_excel('.\\data\\datasets_excel\\scores_participants.xlsx')
-df_win_full.to_excel('.\\data\\datasets_excel\\probability_win_participants.xlsx')
-df_sense_full.to_excel('.\\data\\datasets_excel\\sense_participants.xlsx')
-df_aggregate_full.to_excel('.\\data\\datasets_excel\\summaries_participants.xlsx')
+df_score_full.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\scores_participants.xlsx')
+df_win_full.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\probability_win_participants.xlsx')
+df_sense_full.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\sense_participants.xlsx')
+df_aggregate_full.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\summaries_participants.xlsx')
 
-df_score_full.to_csv('.\\data\\datasets\\scores_participants.csv')
-df_win_full.to_csv('.\\data\\datasets\\probability_win_participants.csv')
-df_sense_full.to_csv('.\\data\\datasets\\sense_participants.csv')
-df_aggregate_full.to_csv('.\\data\\datasets\\summaries_participants.csv')
+df_score_full.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\scores_participants.csv')
+df_win_full.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\probability_win_participants.csv')
+df_sense_full.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\sense_participants.csv')
+df_aggregate_full.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\summaries_participants.csv')
 
 # Metadata for later processing
-pd.Series(words).to_csv(".\\data\\datasets\\word_list.csv", header=False, index=False)
-pd.Series(part_ids).to_csv(".\\data\\datasets\\participants_ids.csv", header=False, index=False)
+pd.Series(words).to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\word_list.csv', header=False, index=False)
+pd.Series(part_ids).to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\participants_ids.csv', header=False, index=False)
 
 # FULL TRIALS DATASET
 trials_index = pd.MultiIndex.from_product([part_ids, task_data.index], names=['part_id', 'words'])
@@ -308,5 +314,5 @@ trials_dataset = pd.concat(agency_datasets).values
 
 df_trials = pd.DataFrame(data=trials_dataset, index=trials_index, columns=task_data.columns)
 
-df_trials.to_excel('.\\data\\datasets_excel\\trials_participants.xlsx')
-df_trials.to_csv('.\\data\\datasets\\trials_participants.csv')
+df_trials.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\trials_participants.xlsx')
+df_trials.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\trials_participants.csv')
