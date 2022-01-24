@@ -3,3 +3,5 @@ data/datasets_prolific_id
 data/raw
 
 gorilla/
+
+preliminary_analysis.ipynb

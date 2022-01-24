@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 
-task_raw = pd.read_csv('.\\data\\raw\\data_exp_70408-v19_task_190122.csv')
-demos_raw = pd.read_csv('.\\data\\raw\\data_exp_70408-v19_demo_190122.csv')
+task_raw =  pd.read_csv('.\\data\\raw\\data_exp_70408-v19_task-niae.csv')
+demos_raw = pd.read_csv('.\\data\\raw\\data_exp_70408-v19_questionnaire-sgay.csv')
 
 # PRIVACY: set TRUE if exporting on github (hides prolific id), else FALSE for checks
 private = True
@@ -24,7 +24,6 @@ response_key = 'Response'
 # Collect participant ID
 part_ids_demo = demos_raw[part_id_key].dropna().unique()
 part_ids_demo = task_raw[part_id_key].dropna().unique()
-
 
 for ids in part_ids_demo:
     part_id = ids
