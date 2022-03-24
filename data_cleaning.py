@@ -1,8 +1,15 @@
 import pandas as pd
 import numpy as np
 
-task_raw =  pd.read_csv('.\\data\\raw\\data_exp_70408-v19_task-niae.csv')
-demos_raw = pd.read_csv('.\\data\\raw\\data_exp_70408-v19_questionnaire-sgay.csv')
+keyword = 'freewill'  # Can be 'freewill'
+
+sense_question = True # True for the first agency dataset
+
+demographics_file_name = 'data_demo_230322.csv'
+data_file_name = 'data_task_230322.csv'
+
+task_raw =  pd.read_csv(f'.\\data\\raw\\{keyword}\\{data_file_name}')
+demos_raw = pd.read_csv(f'.\\data\\raw\\{keyword}\\{demographics_file_name}')
 
 # PRIVACY: set TRUE if exporting on github (hides prolific id), else FALSE for checks
 private = True
@@ -30,6 +37,8 @@ for ids in part_ids_demo:
 
     # Demos part
     demos_part = demos_raw[demos_raw[part_id_key] == part_id]
+    idx = demos_part.index
+    cols = demos_part.columns
     # Clean dataframe of unused columns and rows
     demos_data = demos_part[[question_key, response_key]].drop(demos_part.tail(1).index, axis=0).dropna()
     # Collect columns
@@ -42,7 +51,6 @@ for ids in part_ids_demo:
     demos_T.columns = new_cols
 
     ##df_demos = demos_T
-
     df_demos = df_demos.append(demos_T)
 
 # If private only remove education, revenues and politics
@@ -92,7 +100,7 @@ def remove_article(my_string, filler='_'):
         return my_string
 
 
-agency_datasets = []
+keyword_datasets = []
 checks_columns = ['total_time_min', 'rock_human_score', 'rock_god_score', 'math1_num_resp', 'math2_num_resp', 'math3_num_resp']
 df_checks = pd.DataFrame(columns=checks_columns)
 
@@ -108,24 +116,28 @@ for part_id in part_ids:
     task_clean = task_part.drop(task_part.tail(1).index, axis=0)[gen_keys + task_math_keys + task_comparison_keys].rename({reaction_time_key:'reaction_time'}, axis=1)
     
     # Sense data
-    sense_data_raw = task_clean[task_clean[zone_key] == sense_val].copy()
-    series = (sense_data_raw[response_key] != 'Does not make sense').astype(int)
-    sense_data_raw['sense_response'] = series
-    sense_data = sense_data_raw.drop(task_math_keys + [zone_key, zone_sec_key, response_key], axis=1).reset_index(drop=True)
+    if sense_question:
+        sense_data_raw = task_clean[task_clean[zone_key] == sense_val].copy()
+        series = (sense_data_raw[response_key] != 'Does not make sense').astype(int)
+        sense_data_raw['sense_response'] = series
+        sense_data = sense_data_raw.drop(task_math_keys + [zone_key, zone_sec_key, response_key], axis=1).reset_index(drop=True)
 
-    # Agency data
-    agency_data_raw_1 = task_clean[task_clean[zone_key] == rating_val]
-    agency_data_raw = agency_data_raw_1[agency_data_raw_1[zone_sec_key] == rating_last_val].copy()
-    agency_data_raw[response_key] = agency_data_raw[response_key].astype(int)
-    agency_data_raw['left_score'] = agency_data_raw[response_key].apply(lambda x: 3 - x if x < 3 else 2 - x)
-    agency_data_raw['right_score'] = agency_data_raw['left_score'].apply(lambda x: -x)
-    agency_data_raw['left_score_binary'] = agency_data_raw['left_score'].apply(lambda x: 1 if x > 0 else 0)
-    agency_data_raw['right_score_binary'] = agency_data_raw['right_score'].apply(lambda x: 1 if x > 0 else 0)
-    #agency_data_raw['right_score'] = agency_data_raw[response_key].apply(lambda x: x - 2 if x > 2 else x - 3)
-    agency_data = agency_data_raw.drop(task_math_keys + [zone_key, zone_sec_key, response_key], axis=1).reset_index(drop=True)
+    # Keyword data
+    keyword_data_raw_1 = task_clean[task_clean[zone_key] == rating_val]
+    keyword_data_raw = keyword_data_raw_1[keyword_data_raw_1[zone_sec_key] == rating_last_val].copy()
+    keyword_data_raw[response_key] = keyword_data_raw[response_key].astype(int)
+    keyword_data_raw['left_score'] = keyword_data_raw[response_key].apply(lambda x: 3 - x if x < 3 else 2 - x)
+    keyword_data_raw['right_score'] = keyword_data_raw['left_score'].apply(lambda x: -x)
+    keyword_data_raw['left_score_binary'] = keyword_data_raw['left_score'].apply(lambda x: 1 if x > 0 else 0)
+    keyword_data_raw['right_score_binary'] = keyword_data_raw['right_score'].apply(lambda x: 1 if x > 0 else 0)
+    #keyword_data_raw['right_score'] = keyword_data_raw[response_key].apply(lambda x: x - 2 if x > 2 else x - 3)
+    keyword_data = keyword_data_raw.drop(task_math_keys + [zone_key, zone_sec_key, response_key], axis=1).reset_index(drop=True)
     
     # Group all data (sense and agency)
-    task_data = agency_data.merge(sense_data, how='left')
+    if sense_question:
+        task_data = keyword_data.merge(sense_data, how='left')
+    else:
+        task_data = keyword_data
     
     # Apply article removal
     task_data['word1'] = task_data['word1'].apply(remove_article)
@@ -134,7 +146,7 @@ for part_id in part_ids:
     task_data = task_data.rename({'word1':'words_left', 'word2':'words_right'}, axis=1)
 
     # Store data
-    agency_datasets.append(task_data)
+    keyword_datasets.append(task_data)
 
 
     ## Checking dataframe
@@ -189,7 +201,7 @@ dfs_aggregate = []
 
 for k, part_id in enumerate(part_ids):
     
-    matrix_prep = agency_datasets[k].copy()
+    matrix_prep = keyword_datasets[k].copy()
 
     for word in words:
         matrix_prep[word + '_left'] = (matrix_prep.words_left == word).astype(int)
@@ -266,19 +278,19 @@ df_sense = pd.DataFrame(index=pairwise_binaries.index, columns=pairwise_binaries
 final_aggregate = pd.DataFrame(index=pairwise_scores.index, columns=df_aggregate.columns, data=aggregate_matrix.mean(axis=0))#.sort_values('mean_score', ascending=False)
 
 # Save files
-df_checks.to_excel('.\\data\\' + destination_folder + '\\datasets_excel\\sanity_checks.xlsx')
-df_demos.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\demographics.xlsx')
-df_score.to_excel('.\\data\\' + destination_folder + '\\datasets_excel\\scores.xlsx')
-df_win.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\probability_win.xlsx')
-df_sense.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\sense.xlsx')
-final_aggregate.to_excel('.\\data\\' + destination_folder + '\\datasets_excel\\summaries.xlsx')
+df_checks.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\sanity_checks.xlsx')
+df_demos.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\demographics.xlsx')
+df_score.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\scores.xlsx')
+df_win.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\probability_win.xlsx')
+final_aggregate.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\summaries.xlsx')
+df_sense.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\sense.xlsx')
 
-df_checks.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\sanity_checks.csv')
-df_demos.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\demographics.csv')
-df_score.to_csv('.\\data\\' + destination_folder + '\\datasets_csv\\scores.csv')
-df_win.to_csv('.\\data\\' + destination_folder + '\\datasets_csv\\probability_win.csv')
-df_sense.to_csv('.\\data\\' + destination_folder + '\\datasets_csv\\sense.csv')
-final_aggregate.to_csv('.\\data\\' + destination_folder + '\\datasets_csv\\summaries.csv')
+df_checks.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\sanity_checks.csv')
+df_demos.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\demographics.csv')
+df_score.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\scores.csv')
+df_win.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\probability_win.csv')
+final_aggregate.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\summaries.csv')
+df_sense.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\sense.csv')
 
 # PARTICIPANT-WISE DATASETS
 index_2d = pd.MultiIndex.from_product([part_ids, words], names=['part_id', 'word'])
@@ -288,32 +300,34 @@ win_dataset = win_matrix.reshape((len(part_ids) * len(words), len(words)))
 sense_dataset = sense_matrix.reshape((len(part_ids) * len(words), len(words)))
 aggregate_dataset = aggregate_matrix.reshape((len(part_ids) * len(words), len(aggregate_columns)))
 
+
 df_score_full = pd.DataFrame(data=score_dataset, index=index_2d, columns=df_score.columns)
 df_win_full = pd.DataFrame(data=win_dataset, index=index_2d, columns=df_score.columns)
 df_sense_full = pd.DataFrame(data=sense_dataset, index=index_2d, columns=df_score.columns)
 df_aggregate_full = pd.DataFrame(data=aggregate_dataset, index=index_2d, columns=aggregate_columns)
 
 
-df_score_full.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\scores_participants.xlsx')
-df_win_full.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\probability_win_participants.xlsx')
-df_sense_full.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\sense_participants.xlsx')
-df_aggregate_full.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\summaries_participants.xlsx')
+df_score_full.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\scores_participants.xlsx')
+df_win_full.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\probability_win_participants.xlsx')
+df_sense_full.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\sense_participants.xlsx')
+df_aggregate_full.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\summaries_participants.xlsx')
 
-df_score_full.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\scores_participants.csv')
-df_win_full.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\probability_win_participants.csv')
-df_sense_full.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\sense_participants.csv')
-df_aggregate_full.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\summaries_participants.csv')
+df_score_full.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\scores_participants.csv')
+df_win_full.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\probability_win_participants.csv')
+df_sense_full.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\sense_participants.csv')
+df_aggregate_full.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\summaries_participants.csv')
 
 # Metadata for later processing
-pd.Series(words).to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\word_list.csv', header=False, index=False)
-pd.Series(part_ids).to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\participants_ids.csv', header=False, index=False)
+pd.Series(words).to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\word_list.csv', header=False, index=False)
+pd.Series(part_ids).to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\participants_ids.csv', header=False, index=False)
 
 # FULL TRIALS DATASET
 trials_index = pd.MultiIndex.from_product([part_ids, task_data.index], names=['part_id', 'words'])
 
-trials_dataset = pd.concat(agency_datasets).values
+trials_dataset = pd.concat(keyword_datasets).values
 
 df_trials = pd.DataFrame(data=trials_dataset, index=trials_index, columns=task_data.columns)
 
-df_trials.to_excel('.\\data\\'  + destination_folder + '\\datasets_excel\\trials_participants.xlsx')
-df_trials.to_csv('.\\data\\'  + destination_folder + '\\datasets_csv\\trials_participants.csv')
+df_trials.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\trials_participants.xlsx')
+df_trials.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\trials_participants.csv')
+
