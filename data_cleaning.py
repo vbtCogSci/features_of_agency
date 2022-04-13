@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
 
-keyword = 'goal_directedness'  # Can be 'freewill', 'agency', 'goal_directedness'
+keyword = 'agency'  # Can be 'freewill', 'agency', 'goal_directedness'
 
 sense_question = True # True for the first agency dataset
 
-demographics_file_name = 'data_demo_090422.csv'
-data_file_name = 'data_task_090422.csv'
+demographics_file_name = 'data_exp_70408-v19_questionnaire-sgay.csv'
+data_file_name = 'data_exp_70408-v19_task-niae.csv'
 
 task_raw =  pd.read_csv(f'.\\data\\raw\\{keyword}\\{data_file_name}')
 demos_raw = pd.read_csv(f'.\\data\\raw\\{keyword}\\{demographics_file_name}')
@@ -187,15 +187,17 @@ for part_id in part_ids:
 ## Score, binary, sense
 words = pd.Series(list(task_data.words_left) + list(task_data.words_right)).unique()
 
-aggregate_columns = ['mean_score', 'score_std', 'win_prob', 'win_prob_std', 'sense_prob', 'sense_std']
+aggregate_columns = ['mean_score', 'score_std', 'win_prob', 'win_prob_std', 'reaction_time_mean', 'reaction_time_std', 'sense_prob', 'sense_std']
 
 score_matrix = np.zeros((len(part_ids), len(words), len(words)))
 win_matrix = np.zeros((len(part_ids), len(words), len(words)))
+reaction_matrix = np.zeros((len(part_ids), len(words), len(words)))
 sense_matrix = np.zeros((len(part_ids), len(words), len(words)))
 aggregate_matrix = np.zeros((len(part_ids), len(words), len(aggregate_columns)))
 
 dfs_scores = []
 dfs_wins = []
+dfs_reaction_time = []
 dfs_sense = []
 dfs_aggregate = []
 
@@ -220,6 +222,7 @@ for k, part_id in enumerate(part_ids):
 
     pairwise_scores = pd.DataFrame()
     pairwise_binaries = pd.DataFrame()
+    reaction_times = pd.DataFrame()
     sense_mat = pd.DataFrame()
 
     for i, word1 in enumerate(words):
@@ -228,6 +231,7 @@ for k, part_id in enumerate(part_ids):
             if word1 == word2:
                 pairwise_scores.loc[word2, word1] = np.nan
                 pairwise_binaries.loc[word2, word1] = np.nan
+                reaction_times.loc[word2, word1] = np.nan
                 sense_mat.loc[word2, word1] = np.nan
                 continue
             #print(len(scores_1[scores_1.words_left == word2]))
@@ -238,6 +242,7 @@ for k, part_id in enumerate(part_ids):
 
             pairwise_scores.loc[word2, word1] = scores_2.loc[0, word1 + '_score']
             pairwise_binaries.loc[word2, word1] = scores_2.loc[0, word1 + '_score_binary']
+            reaction_times.loc[word2, word1] = scores_2.loc[0, 'reaction_time']
             sense_mat.loc[word2, word1] = scores_2.loc[0, 'sense_response']
  
     # In matrices, columns are the pespective of words while row is the perspective of opponents
@@ -249,18 +254,22 @@ for k, part_id in enumerate(part_ids):
     df_aggregate[aggregate_columns[1]] = pairwise_scores.std()
     df_aggregate[aggregate_columns[2]] = pairwise_binaries.mean()
     df_aggregate[aggregate_columns[3]] = pairwise_binaries.std()
-    df_aggregate[aggregate_columns[4]] = sense_mat.mean()
-    df_aggregate[aggregate_columns[5]] = sense_mat.std()
+    df_aggregate[aggregate_columns[4]] = reaction_times.mean()
+    df_aggregate[aggregate_columns[5]] = reaction_times.std()
+    df_aggregate[aggregate_columns[6]] = sense_mat.mean()
+    df_aggregate[aggregate_columns[7]] = sense_mat.std()
 
     # Store data in arrays
     score_matrix[k, :, :] = pairwise_scores.to_numpy()
     win_matrix[k, :, :] = pairwise_binaries.to_numpy()
+    reaction_matrix[k, :, :] = reaction_times.to_numpy()
     sense_matrix[k, :, :] = sense_mat.to_numpy()
     aggregate_matrix[k, :, :] = df_aggregate.to_numpy()
 
 
     dfs_scores.append(pairwise_scores)
     dfs_wins.append(pairwise_binaries)
+    dfs_reaction_time.append(reaction_times)
     dfs_sense.append(sense_mat)
     dfs_aggregate.append(df_aggregate)
 
@@ -273,6 +282,7 @@ for k, part_id in enumerate(part_ids):
 # Generate global datasets
 df_score = pd.DataFrame(index=pairwise_binaries.index, columns=pairwise_binaries.columns, data=score_matrix.mean(axis=0))
 df_win = pd.DataFrame(index=pairwise_binaries.index, columns=pairwise_binaries.columns, data=win_matrix.mean(axis=0))
+df_react = pd.DataFrame(index=pairwise_binaries.index, columns=pairwise_binaries.columns, data=reaction_matrix.mean(axis=0))
 df_sense = pd.DataFrame(index=pairwise_binaries.index, columns=pairwise_binaries.columns, data=sense_matrix.mean(axis=0))
 
 final_aggregate = pd.DataFrame(index=pairwise_scores.index, columns=df_aggregate.columns, data=aggregate_matrix.mean(axis=0))#.sort_values('mean_score', ascending=False)
@@ -282,6 +292,7 @@ df_checks.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\s
 df_demos.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\demographics.xlsx')
 df_score.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\scores.xlsx')
 df_win.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\probability_win.xlsx')
+df_react.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\reaction_times.xlsx')
 final_aggregate.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\summaries.xlsx')
 df_sense.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\sense.xlsx')
 
@@ -289,6 +300,7 @@ df_checks.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\sanit
 df_demos.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\demographics.csv')
 df_score.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\scores.csv')
 df_win.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\probability_win.csv')
+df_react.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\reaction_times.csv')
 final_aggregate.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\summaries.csv')
 df_sense.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\sense.csv')
 
@@ -297,23 +309,27 @@ index_2d = pd.MultiIndex.from_product([part_ids, words], names=['part_id', 'word
 
 score_dataset = score_matrix.reshape((len(part_ids) * len(words), len(words)))
 win_dataset = win_matrix.reshape((len(part_ids) * len(words), len(words)))
+reaction_dataset = reaction_matrix.reshape((len(part_ids) * len(words), len(words)))
 sense_dataset = sense_matrix.reshape((len(part_ids) * len(words), len(words)))
 aggregate_dataset = aggregate_matrix.reshape((len(part_ids) * len(words), len(aggregate_columns)))
 
 
 df_score_full = pd.DataFrame(data=score_dataset, index=index_2d, columns=df_score.columns)
 df_win_full = pd.DataFrame(data=win_dataset, index=index_2d, columns=df_score.columns)
+df_reaction_full = pd.DataFrame(data=reaction_dataset, index=index_2d, columns=df_score.columns)
 df_sense_full = pd.DataFrame(data=sense_dataset, index=index_2d, columns=df_score.columns)
 df_aggregate_full = pd.DataFrame(data=aggregate_dataset, index=index_2d, columns=aggregate_columns)
 
 
 df_score_full.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\scores_participants.xlsx')
 df_win_full.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\probability_win_participants.xlsx')
+df_reaction_full.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\reaction_times_participants.xlsx')
 df_sense_full.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\sense_participants.xlsx')
 df_aggregate_full.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\summaries_participants.xlsx')
 
 df_score_full.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\scores_participants.csv')
 df_win_full.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\probability_win_participants.csv')
+df_reaction_full.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\reaction_times_participants.csv')
 df_sense_full.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\sense_participants.csv')
 df_aggregate_full.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\summaries_participants.csv')
 
