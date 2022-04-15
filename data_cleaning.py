@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
 
-keyword = 'agency'  # Can be 'freewill', 'agency', 'goal_directedness'
+keyword = 'goal_setting'  # Can be 'freewill', 'agency', 'goal_directedness', 'goal_setting'
 
 sense_question = True # True for the first agency dataset
 
-demographics_file_name = 'data_exp_70408-v19_questionnaire-sgay.csv'
-data_file_name = 'data_exp_70408-v19_task-niae.csv'
+demographics_file_name = 'data_demo_140422.csv'
+data_file_name = 'data_task_140422.csv'
 
 task_raw =  pd.read_csv(f'.\\data\\raw\\{keyword}\\{data_file_name}')
 demos_raw = pd.read_csv(f'.\\data\\raw\\{keyword}\\{demographics_file_name}')
