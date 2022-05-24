@@ -5,3 +5,6 @@ data/raw
 gorilla/
 
 preliminary_analysis.ipynb
+
+data_cleaning_comparisons.ipynb
+data_cleaning_properties.ipynb
