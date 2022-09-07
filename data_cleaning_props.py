@@ -5,14 +5,14 @@ import numpy as np
 keyword = "properties_1"
 
 demographics_file_name = 'data_demo_070922.csv'
-data_file_names = [f'data_task_{i+1}_070922.csv' for i in range(4)]
+data_file_names = [f'data_task_{i+1}_070922.csv' for i in range(8)]
 
 #task_raw =  pd.read_csv(f'.\\data\\raw\\{keyword}\\{data_file_name}')
 demos_raw = pd.read_csv(f'.\\data\\raw\\{keyword}\\{demographics_file_name}')
 data_files_raw = [pd.read_csv(f'.\\data\\raw\\{keyword}\\{file_name}') for file_name in data_file_names]
 
 # PRIVACY: set TRUE if exporting on github (hides prolific id), else FALSE for checks
-private = True
+private = False
 if private:
     part_id_key = 'Participant Private ID'
     destination_folder = 'datasets'
@@ -61,7 +61,7 @@ if private:
 
 # Property allocation dictionaries
 property_allocation_dict = {
-    1 : {
+    4 : {
         'physicalproperty1':'movement',
         'physicalproperty2': 'energy',
         'physicalproperty3': 'replication',
@@ -77,7 +77,7 @@ property_allocation_dict = {
         'highlevelproperty3': 'goal_directedness',
         'highlevelproperty4': 'freewill'
     },
-    2 : {
+    1 : {
         'physicalproperty1':'energy',
         'physicalproperty2': 'complexity',
         'physicalproperty3': 'movement',
@@ -109,7 +109,72 @@ property_allocation_dict = {
         'highlevelproperty3': 'goal_directedness',
         'highlevelproperty4': 'goal_setting'
     },
-    4 : {
+    2 : {
+        'physicalproperty1':'energy',
+        'physicalproperty2': 'replication',
+        'physicalproperty3': 'complexity',
+        'physicalproperty4': 'movement',
+        'behaviouralproperty1': 'monitoring',
+        'behaviouralproperty2': 'mistakes',
+        'behaviouralproperty3': 'variety',
+        'behaviouralproperty4': 'learning',
+        'behaviouralproperty5': 'communication',
+        'behaviouralproperty6': 'reaction',
+        'highlevelproperty1': 'goal_setting',
+        'highlevelproperty2': 'goal_directedness',
+        'highlevelproperty3': 'agency',
+        'highlevelproperty4': 'freewill'
+    },
+    ###
+    8 : {
+        'physicalproperty1':'movement',
+        'physicalproperty2': 'energy',
+        'physicalproperty3': 'replication',
+        'physicalproperty4': 'complexity',
+        'behaviouralproperty1': 'learning',
+        'behaviouralproperty2': 'reaction',
+        'behaviouralproperty3': 'mistakes',
+        'behaviouralproperty4': 'communication',
+        'behaviouralproperty5': 'variety',
+        'behaviouralproperty6': 'monitoring',
+        'highlevelproperty1': 'agency',
+        'highlevelproperty2': 'goal_setting',
+        'highlevelproperty3': 'goal_directedness',
+        'highlevelproperty4': 'freewill'
+    },
+    5 : {
+        'physicalproperty1':'energy',
+        'physicalproperty2': 'complexity',
+        'physicalproperty3': 'movement',
+        'physicalproperty4': 'replication',
+        'behaviouralproperty1': 'communication',
+        'behaviouralproperty2': 'monitoring',
+        'behaviouralproperty3': 'reaction',
+        'behaviouralproperty4': 'variety',
+        'behaviouralproperty5': 'mistakes',
+        'behaviouralproperty6': 'learning',
+        'highlevelproperty1': 'goal_setting',
+        'highlevelproperty2': 'freewill',
+        'highlevelproperty3': 'agency',
+        'highlevelproperty4': 'goal_directedness'
+    },
+    7 : {
+        'physicalproperty1':'complexity',
+        'physicalproperty2': 'movement',
+        'physicalproperty3': 'replication',
+        'physicalproperty4': 'energy',
+        'behaviouralproperty1': 'reaction',
+        'behaviouralproperty2': 'variety',
+        'behaviouralproperty3': 'learning',
+        'behaviouralproperty4': 'communication',
+        'behaviouralproperty5': 'monitoring',
+        'behaviouralproperty6': 'mistakes',
+        'highlevelproperty1': 'freewill',
+        'highlevelproperty2': 'agency',
+        'highlevelproperty3': 'goal_directedness',
+        'highlevelproperty4': 'goal_setting'
+    },
+    6 : {
         'physicalproperty1':'energy',
         'physicalproperty2': 'replication',
         'physicalproperty3': 'complexity',
