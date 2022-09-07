@@ -12,7 +12,7 @@ demos_raw = pd.read_csv(f'.\\data\\raw\\{keyword}\\{demographics_file_name}')
 data_files_raw = [pd.read_csv(f'.\\data\\raw\\{keyword}\\{file_name}') for file_name in data_file_names]
 
 # PRIVACY: set TRUE if exporting on github (hides prolific id), else FALSE for checks
-private = False
+private = True
 if private:
     part_id_key = 'Participant Private ID'
     destination_folder = 'datasets'
