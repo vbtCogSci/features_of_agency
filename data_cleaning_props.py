@@ -4,8 +4,8 @@ import numpy as np
 
 keyword = "properties_1"
 
-demographics_file_name = 'data_demo_230522.csv'
-data_file_names = [f'data_task_{i+1}_230522.csv' for i in range(4)]
+demographics_file_name = 'data_demo_070922.csv'
+data_file_names = [f'data_task_{i+1}_070922.csv' for i in range(4)]
 
 #task_raw =  pd.read_csv(f'.\\data\\raw\\{keyword}\\{data_file_name}')
 demos_raw = pd.read_csv(f'.\\data\\raw\\{keyword}\\{demographics_file_name}')

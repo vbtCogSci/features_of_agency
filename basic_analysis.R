@@ -3,10 +3,11 @@ library(sdamr)
 library(lme4)
 library(afex)
 library(corrplot)
+library(CAM)
 
 data = read.csv('C:\\Users\\vbtes\\CompProjects\\vbtCogSci\\features_of_agency\\data\\datasets_prolific_id\\properties_1\\datasets_csv\\task_data.csv')
 colnames(data)
-
+dim(data)
 
 mod = lm(agency ~ movement + energy + replication + complexity + learning + reaction + mistakes + communication + variety + monitoring, data=data)
 summary(mod)
@@ -38,7 +39,7 @@ cor.mtest <- function(mat, ...) {
   colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
   p.mat
 }
-p.mat = cor.mtest(properties)
-corrplot(corr_prop,p.mat = p.mat, sig.level = 0.01)
+p.mat = cor.mtest(data[colnames(data)[6:19]])
+corrplot(properties,p.mat = p.mat, sig.level = 0.01)
 
 
