@@ -1,6 +1,7 @@
 from ast import keyword
 import pandas as pd
 import numpy as np
+from sklearn.mixture import GaussianMixture
 
 keyword = "properties_1"
 
@@ -266,6 +267,8 @@ df_task = df_task.drop(['property', 'score'], axis=1).reset_index(drop=True)
 
 df_checks = df_task[df_task.word.isin(['human', 'rock', 'hammer'])]
 
+
+
 # Save files
 df_checks.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\sanity_checks.xlsx')
 df_demos.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\demographics.xlsx')
@@ -275,4 +278,35 @@ df_task.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\tas
 df_checks.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\sanity_checks.csv')
 df_demos.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\demographics.csv')
 df_task_lf.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\task_data_lf.csv')
+df_task.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\task_data.csv')
+
+# Clustering
+# Task data
+df_task = f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\task_data.csv'
+df_task = pd.read_csv(df_task).drop('Unnamed: 0', axis=1)
+
+properties = df_task.columns[4:-4].to_list()
+properties_agency = df_task.columns[4:-4].to_list() + ['agency']
+properties_full = df_task.columns[4:].to_list()
+
+df_means = df_task[['word'] + properties].groupby('word').mean()#.sort_values('agency')
+#df_means = df_means.groupby('word').mean()
+#print(df_means.groupby('word').mean())
+X = df_means.to_numpy()
+labels = df_means.index.to_list()
+
+num_components = 6
+cov = 'full'
+
+gm = GaussianMixture(n_components=num_components, covariance_type=cov).fit(X)
+
+a = gm.predict(X)
+
+df_means['assignment'] = a
+
+for w in df_means.index:
+    df_task.loc[df_task.word == w, 'cluster'] = df_means.loc[w, 'assignment']
+
+
+df_task.to_excel(f'.\\data\\{destination_folder}\\{keyword}\\datasets_excel\\task_data.xlsx')
 df_task.to_csv(f'.\\data\\{destination_folder}\\{keyword}\\datasets_csv\\task_data.csv')
