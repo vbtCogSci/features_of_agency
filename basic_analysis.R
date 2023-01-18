@@ -5,7 +5,7 @@ library(afex)
 library(corrplot)
 library(CAM)
 
-data = read.csv('C:\\Users\\vbtes\\CompProjects\\vbtCogSci\\features_of_agency\\data\\datasets_prolific_id\\properties_1\\datasets_csv\\task_data.csv')
+data = read.csv('C:\\Users\\vbtes\\CompProjects\\vbtCogSci\\features_of_agency\\data\\datasets\\properties_1\\datasets_csv\\task_data.csv')
 colnames(data)
 dim(data)
 data$cluster = as.factor(data$cluster)
